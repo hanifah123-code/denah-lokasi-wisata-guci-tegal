@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Denah Wisata Guci Tegal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet Routing Machine -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+  <style>
+    #map { height: 100vh; }
+    body { margin: 0; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  const map = L.map('map').setView([-7.199, 109.16], 14);
+
+  // Tambahkan peta dasar
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Routing kontrol global
+  let routingControl;
+
+  // Fungsi menampilkan rute
+  function navigateTo(destLat, destLng) {
+    if (!navigator.geolocation) {
+      alert("Geolocation tidak didukung browser ini.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(position => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      if (routingControl) {
+        map.removeControl(routingControl);
+      }
+
+      routingControl = L.Routing.control({
+        waypoints: [
+          L.latLng(userLat, userLng),
+          L.latLng(destLat, destLng)
+        ],
+        routeWhileDragging: false
+      }).addTo(map);
+    }, () => {
+      alert("Gagal mendapatkan lokasi Anda.");
+    });
+  }
+
+  // Data lokasi wisata (sebagian koordinat dari kamu)
+  const wisataGuci = [
+  {
+    name: "Curug Sirwiti",
+    lat: -7.1998958331478145,
+    lng: 109.16452873184562,
+    fasilitas: "Parkir, toilet, mushola, warung pinggir; jalur trekking rapi; gazebo; spot foto, kolam alami ±1 m",
+    kondisiJalan: "Jalan menuju Curug Sirwiti melewati jalur yang sama dengan akses utama Guci. Karena kondisi umum jalan masih dalam tahap perbaikan, disarankan membawa kendaraan stabil, menghindari kecepatan tinggi, dan berhati-hati terhadap lubang-lubang tersebar.",
+    jamBuka: "07.00 - 17.00 WIB",
+    hargatiketmasuk: "Rp 10.000 (Weekdays), RP 15.000 (Weekend)"
+  },
+  {
+    name: "Hot Water Boom Guci-Ku",
+    lat: -7.194844256032798,
+    lng: 109.16215942534008,
+    fasilitas: "Kolam air panas bersih, seluncuran, ember tumpah, flying fox, villa & hotel, panjat tebing, area anak & dewasa, gazebo, toilet, mushola, parkir",
+    kondisiJalan: "Akses untuk mobil dan motor cukup baik, tetapi area parkir kedua berada di permukaan bebatuan dan menanjak sehingga memerlukan kehati-hatian saat parkir dan turun-naik.Meskipun area parkir utama cukup luas, namun saat akhir pekan kondisi jalan menuju parkir bisa macet ",
+    jamBuka: "07.00–20.00 WIB (Weekdays), 06.00–21.00 WIB (Weekend)",
+    hargatiketmasuk: "Rp 40.000-Rp 45.000"
+  },
+  {
+    name: "The Baron Hill of Guci",
+    lat: -7.199047992794287,
+    lng: 109.16285519414298,
+    fasilitas: "Jembatan kaca panjang ~43 m, replika kastil & mobil, ~19 spot foto instagramable, toile­t, mushola, parkir",
+    kondisiJalan: "Jalan menuju destinasi ini menanjak dan berkelok dengan ketinggian ± 400 m dan melewati tangga setapak di bukit. Akses kendaraan bisa, namun kondisi jalan sangat curam dan sempit, membutuhkan kehati-hatian ekstra",
+    jamBuka: "07.00–20.00 WIB (Weekdays), 07.00–21.00 WIB (Weekend)",
+    hargatiketmasuk: "Rp 15.000"
+  },
+  {
+    name: "Bukit Bintang Guci",
+    lat: -7.195092292798142,
+    lng: 109.15198786530723,
+    fasilitas: "Giant swing, perosotan raksasa, jembatan kaca 3D, glamping, camp ground, campervan spot, toilet, mushola, parkir",
+    kondisiJalan: "Akses masuk melewati jalan menanjak dan sempit, terdapat banyak lubang di ruas jalan sebelum pintu masuk Bukit Bintang. Dapat dilewati mobil kecil dan motor, namun tidak direkomendasikan untuk bus besar",
+    jamBuka: "24 jam",
+    hargatiketmasuk: "Rp 20.000-Rp 25.000"
+  },
+  {
+    name: "Pancuran 13 Guci",
+    lat: -7.198999348535177,
+    lng: 109.16446989414298,
+    fasilitas: "13 pancuran air panas, kolam, toilet, warung, loker, hotel/vila, lapangan tenis & sepak bola, camping",
+    kondisiJalan: "Salah satu akses paling padat di kawasan Guci. Banyak kendaraan parkir sembarangan, menyebabkan kemacetan. Jalan sempit dan banyak pejalan kaki, sehingga perlu kewaspadaan tinggi",
+    jamBuka: "24 jam",
+    hargatiketmasuk: "Rp 19.000-Rp 25.000"
+  },
+  {
+    name: "Taman Anggrek Guci",
+    lat: -7.172364697476401,
+    lng: 109.15063002719221,
+    fasilitas: "Kebun bunga anggrek ala Eropa, area foto, parkir, toilet, warung",
+    kondisiJalan: "Akses dapat dilalui mobil, namun ruas jalan sempit dan berkerikil menjelang lokasi. Tidak terdapat marka jalan atau penerangan malam",
+    jamBuka: "08.00-17.00 WIB",
+    hargatiketmasuk: "Rp 10.000-Rp 15.000"
+  },
+  {
+    name: "Golden Park Guci",
+    lat: -7.187469203746857,
+    lng: 109.156081265307,
+    fasilitas: "Seluncuran rumput & air, perahu raksasa, flying fox, spot foto, kolam kecil, kantin, toilet, mushola, parkir",
+    kondisiJalan: "Akses utama melewati jalan kabupaten. Sebagian titik tergenang dan bergelombang, terutama di musim hujan",
+    jamBuka: "07.00-21.00 WIB",
+    hargatiketmasuk: "Rp 20.000-Rp 25.000"
+  },
+  {
+    name: "Curug Pengantin",
+    lat: -7.190122422203403,
+    lng: 109.16023885045205,
+    fasilitas: "Kolam alami, spot piknik, toilet nearby",
+    kondisiJalan: "Berada di dalam hutan dan hanya bisa dicapai dengan jalan kaki ±15 menit dari tempat parkir. Jalan setapak tanah dan berbatu, licin saat hujan",
+    jamBuka: "07.00-16.00 WIB",
+    hargatiketmasuk: "Rp 3.000-Rp 5.000"
+  },
+  {
+    name: "Curug Jedor Guci",
+    lat: -7.201671692762177,
+    lng: 109.16484972298619,
+    fasilitas: "Aliran air sangat segar/jernih, kolam alami hangat, area istirahat, toilet",
+    kondisiJalan: "Jalan menuju lokasi sempit dan berbatu. Kendaraan hanya sampai titik parkir, dilanjutkan trekking ringan 200 meter",
+    jamBuka: "07.00-17.00 WIB",
+    hargatiketmasuk: "Rp 5.000"
+  },
+  {
+    name: "Kolam Renang Graha Tirta Ayu",
+    lat: -7.196767552171671,
+    lng: 109.16278242443045,
+    fasilitas: "Kolam + view Gunung Slamet & perbukitan, toilet, bilik ganti, kafe, parkir",
+    kondisiJalan: "Dapat dijangkau kendaraan roda empat. Akses cukup baik namun turunan tajam dan sempit di sekitar kolam",
+    jamBuka: "08.00-19.00 WIB",
+    hargatiketmasuk: "Rp 20.000"
+  },
+  {
+    name: "Kolam Renang Barokah",
+    lat: -7.029689773744783,
+    lng: 109.15350183778469,
+    fasilitas: "Kolam air panas, kolam alami/dingin, sungai hangat, loker, warung, toilet, lapangan voli, tenis, camping",
+    kondisiJalan: "Jalur utama cukup baik. Akses masuk sedikit sempit namun sudah beraspal",
+    jamBuka: "08.00-19.00 WIB",
+    hargatiketmasuk: "Rp 10.000-Rp 20.000"
+  },
+  {
+    name: "Guci Forest",
+    lat: -7.190169812418501,
+    lng: 109.16401950150937,
+    fasilitas: "Hutan pinus, camping ground, villa/glamping, kolam air hangat, café/ resto, outbound, paintball, toilet, mushola, parkir",
+    kondisiJalan: "Jalan masuk menanjak, berada di dataran tinggi dan hutan pinus. Belum sepenuhnya diaspal, kombinasi batu dan tanah. Tidak disarankan menggunakan motor saat hujan",
+    jamBuka: "08.00-17.00 WIB (objek), 24 jam (villa/resort)",
+    hargatiketmasuk: "Rp 25.000-Rp 28.000; penyewaan tenda ~Rp 100.000"
+  },
+  {
+    name: "Kolam Renang Rindu Alam",
+    lat: -7.18436843323743,
+    lng: 109.15452255141557 ,
+    fasilitas: "Kolam + wahana air, pemandangan perkebunan/hill, toilet, warung, parkir",
+    kondisiJalan: "Akses cukup baik, namun ada tanjakan terjal dekat gerbang utama. Jalur parkir sempit dan tidak beraspal",
+    jamBuka: "06.00-20.00 WIB",
+    hargatiketmasuk: "Rp 20.000-Rp 25.000"
+  },
+  {
+    name: "Pancuran 5 Guci",
+    lat: -7.198224697398086,
+    lng: 109.16404675326613,
+    fasilitas: "5 pancuran air panas, kolam, toilet, warung, loker, area camping, villa, lapangan olahraga",
+    kondisiJalan: "Lokasi berada dekat pemukiman.Jalan kecil, padat di akhir pekan. Sering terjadi kemacetan karena parkir liar",
+    jamBuka: "24 jam",
+    hargatiketmasuk: "Rp 10.000-Rp 12.000"
+  },
+  {
+    name: "Kolam Renang Dua Tang",
+    lat: -7.197640211314059,
+    lng: 109.1641033838709,
+    fasilitas: "Kolam tertutup indoor, beragam kedalaman, air panas; penginapan terdekat, toilet, warung, parkir",
+    kondisiJalan: "Akses dapat dilalui kendaraan pribadi. Jalanan kecil namun beraspal",
+    jamBuka: "07.00-19.00 WIB",
+    hargatiketmasuk: "Rp 10.000-Rp 12.000"
+  },
+  {
+    name: "Onsen Omahe Banyu Anget Guci",
+    lat: -7.196096317658274,
+    lng: 109.16367108025169,
+    fasilitas: "Onsen gaya Jepang, kolam air panas alami, toilet, warung",
+    kondisiJalan: "Berada di tengah kawasan padat penginapan. Akses sudah beraspal namun sempit. Sering macet saat akhir pekan",
+    jamBuka: "08.00-17.00 WIB",
+    hargatiketmasuk: "Rp 40.000"
+  },
+  {
+    name: "Curug Permadi",
+    lat: -7.209826092739385,
+    lng: 109.1674153225802,
+    fasilitas: "Curug alami, hutan pinus, kolam, parking, toilet",
+    kondisiJalan: "Jalan cukup ekstrem dengan menyusuri hutan dan jalan setapak. Dapat dilalui motor dan sebagian mobil off-road. Tidak disarankan dikunjungi malam hari atau saat hujan deras",
+    jamBuka: "07.00-21.00 WIB (Weekday), 24 jam (Weekend)",
+    hargatiketmasuk: "Rp 15.000"
+  },
+  
+  // Tambahkan lokasi lainnya sesuai kebutuhan
+];
+
+
+  // Tambahkan semua marker ke peta
+ // Tambahkan semua marker ke peta
+wisataGuci.forEach(w => {
+  L.marker([w.lat, w.lng])
+    .addTo(map)
+    .bindPopup(`
+      <b>${w.name}</b><br>
+      <b>Fasilitas:</b> ${w.fasilitas}<br>
+      <b>Kondisi Jalan:</b> ${w.kondisiJalan}<br>
+      <b>Jam Buka:</b> ${w.jamBuka}<br>
+      <b>Tiket:</b> ${w.hargatiketmasuk}<br><br>
+      <button onclick="navigateTo(${w.lat}, ${w.lng})">Tampilkan Rute</button>
+    `);
+}); // <- Penutup forEach
+</script>
+
+</body>
+</html>
+
